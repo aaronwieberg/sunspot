@@ -43,7 +43,7 @@ module Sunspot #:nodoc:
 
       def master_config(sunspot_rails_configuration)
         config = Sunspot::Configuration.build
-        config.solr.url = URI::HTTP.build(
+        config.solr.url = sunspot_rails_configuration.master_uri_scheme.build(
           :host => sunspot_rails_configuration.master_hostname,
           :port => sunspot_rails_configuration.master_port,
           :path => sunspot_rails_configuration.master_path
@@ -55,7 +55,7 @@ module Sunspot #:nodoc:
 
       def slave_config(sunspot_rails_configuration)
         config = Sunspot::Configuration.build
-        config.solr.url = URI::HTTP.build(
+        config.solr.url = sunspot_rails_configuration.uri_scheme.build(
           :host => sunspot_rails_configuration.hostname,
           :port => sunspot_rails_configuration.port,
           :path => sunspot_rails_configuration.path

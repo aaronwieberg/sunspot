@@ -5,6 +5,10 @@ describe Sunspot::Rails::Configuration, "default values without a sunspot.yml" d
     File.stub!(:exist?).and_return(false) # simulate sunspot.yml not existing
     @config = Sunspot::Rails::Configuration.new
   end
+
+  it "should handle the 'uri_scheme' property when not set" do
+    @config.uri_scheme.should == URI::HTTP
+  end
   
   it "should handle the 'hostname' property when not set" do
     @config.hostname.should == 'localhost'
@@ -92,6 +96,10 @@ describe Sunspot::Rails::Configuration, "user provided sunspot.yml" do
     @config = Sunspot::Rails::Configuration.new
   end
 
+  it "should handle the 'uri_scheme' property when 'secure' set" do
+    @config.uri_scheme.should == URI::HTTPS
+  end
+
   it "should handle the 'hostname' property when set" do
     @config.hostname.should == 'some.host'
   end
@@ -168,6 +176,10 @@ describe Sunspot::Rails::Configuration, "with ENV['SOLR_URL'] overriding sunspot
     ENV.delete('SOLR_URL')
   end
 
+  it "should handle the 'uri_scheme' property set" do
+    @config.uri_scheme.should ==  URI::HTTP
+  end  
+
   it "should handle the 'hostname' property when set" do
     @config.hostname.should == 'environment.host'
   end
@@ -178,6 +190,29 @@ describe Sunspot::Rails::Configuration, "with ENV['SOLR_URL'] overriding sunspot
   
   it "should handle the 'path' property when set" do
     @config.path.should == '/solr/env'
+  end
+end
+
+describe Sunspot::Rails::Configuration, "with ENV['SOLR_URL'] overriding sunspot.yml and using a secure connection" do
+  before(:all) do
+    ENV['SOLR_URL'] = 'https://environment.host/solr/env'
+  end
+
+  before(:each) do
+    ::Rails.stub!(:env => 'config_test')
+    @config = Sunspot::Rails::Configuration.new
+  end
+  
+  after(:all) do
+    ENV.delete('SOLR_URL')
+  end
+
+  it "should handle the 'uri_scheme' property" do
+    @config.uri_scheme.should ==  URI::HTTPS
+  end
+
+  it "should handle the 'port' property" do
+    @config.port.should == 443
   end
 end
 

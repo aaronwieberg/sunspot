@@ -26,7 +26,8 @@ module Sunspot #:nodoc:
     #   production:
     #     solr:
     #       hostname: localhost
-    #       port: 8983
+    #       port: 8443
+    #       secure: true
     #       path: /solr/myindex
     #       log_level: WARNING
     #       solr_home: /some/path
@@ -52,6 +53,23 @@ module Sunspot #:nodoc:
       LOG_LEVELS = %w(FINE INFO WARNING SEVERE SEVERE INFO)
 
       attr_writer :user_configuration
+      #
+      # The URI Scheme to use to connect to Solr. Defaults to URI::HTTP.
+      # If configured to use SSL this will return URI::HTTPS.
+      #
+      # ==== Returns
+      #
+      # Class:: URI scheme (URI::HTTP or URI::HTTPS)
+      #
+      def uri_scheme
+        unless defined?(@uri_scheme)
+          @uri_scheme   = solr_url.class if solr_url
+          @uri_scheme ||= user_configuration_from_key('solr', 'secure') == true ? 
+            URI::HTTPS : URI::HTTP
+        end
+        @uri_scheme
+      end
+
       #
       # The host name at which to connect to Solr. Default 'localhost'.
       #
@@ -101,6 +119,22 @@ module Sunspot #:nodoc:
           @path ||= default_path
         end
         @path
+      end
+
+      #
+      # The URI Scheme to use to connect to the master Solr instance. Defaults 
+      # to URI::HTTP.  If configured to use SSL this will return URI::HTTPS.
+      #
+      # ==== Returns
+      #
+      # Class:: URI scheme (URI::HTTP or URI::HTTPS)
+      #
+      def master_uri_scheme
+        unless defined?(@uri_scheme)
+          @uri_scheme ||= user_configuration_from_key('master_solr', 'secure') == true ? 
+            URI::HTTPS : URI::HTTP
+        end
+        @uri_scheme
       end
 
       #
